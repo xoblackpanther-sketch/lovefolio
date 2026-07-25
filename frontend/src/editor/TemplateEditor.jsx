@@ -13,21 +13,31 @@ const DRAFT_KEY = (slug, siteId) => `lws:draft:${slug}:${siteId || "demo"}`;
  * Schema-driven visual editor. Fully generic — reuses across any template.
  */
 export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
-    const { config } = templateEntry;
-    const slug = config.slug;
+    const config = templateEntry?.config || {};
+    const slug = config.slug || "sunset-love";
+    const schema = config.editableSchema || [];
+
+    // Fallback default state built dynamically from schema keys & defaultValues
+    const defaultDataFromSchema = useMemo(() => {
+        const schemaDefaults = {};
+        schema.forEach((f) => {
+            if (f.key) schemaDefaults[f.key] = f.defaultValue || "";
+        });
+        return { ...schemaDefaults, ...(config.demoData || {}) };
+    }, [schema, config.demoData]);
 
     const initialContent = useMemo(() => {
         try {
             const raw = localStorage.getItem(DRAFT_KEY(slug, siteId));
             if (raw) {
                 const parsed = JSON.parse(raw);
-                return stripDeadLocalObjects(parsed);
+                return { ...defaultDataFromSchema, ...stripDeadLocalObjects(parsed) };
             }
         } catch {
             /* ignore */
         }
-        return structuredClone(config.demoData || {});
-    }, [slug, siteId, config.demoData]);
+        return structuredClone(defaultDataFromSchema);
+    }, [slug, siteId, defaultDataFromSchema]);
 
     const [content, setContent] = useState(initialContent);
     const [mobileMode, setMobileMode] = useState("edit");
@@ -40,7 +50,6 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
         setContent((prev) => ({ ...prev, [key]: value }));
     }, []);
 
-    // Wrapped in useCallback to prevent unneeded re-renders and fix ESLint missing dependency error
     const save = useCallback(() => {
         try {
             const cleaned = stripLocalObjectsForStorage(content);
@@ -51,9 +60,8 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
         }
     }, [content, slug, siteId]);
 
-    // Custom Reset Confirmation Handler
     const handleConfirmReset = () => {
-        setContent(structuredClone(config.demoData || {}));
+        setContent(structuredClone(defaultDataFromSchema));
         try {
             localStorage.removeItem(DRAFT_KEY(slug, siteId));
         } catch {
@@ -76,7 +84,7 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
     }, [save]);
 
     return (
-        <div data-testid={EDITOR.root} className="min-h-[calc(100vh-72px)] relative">
+        <div data-testid={EDITOR.root} className="min-h-screen flex flex-col bg-[color:var(--lws-bg,#0a0508)] text-white relative">
             {/* Custom Modern Reset Confirmation Modal */}
             {showResetModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
@@ -88,7 +96,7 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
                             <h3 className="font-serif text-lg font-semibold text-amber-100">Reset All Fields?</h3>
                         </div>
                         <p className="text-sm text-neutral-400 leading-relaxed">
-                            Are you sure you want to reset all fields to the default demo content? Any unsaved edits will be lost.
+                            Are you sure you want to reset all fields to default content? Any unsaved edits will be lost.
                         </p>
                         <div className="flex items-center justify-end gap-3 pt-2">
                             <button
@@ -110,35 +118,35 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
                 </div>
             )}
 
-            {/* Toolbar */}
-            <div className="border-b border-[color:var(--lws-border)] bg-[color:var(--lws-bg-2)] sticky top-[72px] z-30">
-                <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3">
+            {/* Toolbar Header */}
+            <div className="border-b border-[color:var(--lws-border)] bg-[color:var(--lws-bg-2,#120910)] sticky top-0 z-40 shrink-0">
+                <div className="max-w-[120rem] mx-auto px-4 md:px-6 py-3 flex items-center gap-3">
                     <Link
                         to="/dashboard"
                         data-testid={EDITOR.exitBtn}
-                        className="lws-btn-ghost text-xs"
+                        className="lws-btn-ghost text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5"
                     >
                         <ArrowLeft size={14} /> Exit
                     </Link>
                     <div className="flex-1 min-w-0">
-                        <div className="text-xs uppercase tracking-widest text-[color:var(--lws-text-dim)]">
+                        <div className="text-[10px] uppercase tracking-widest text-white/40">
                             Editing template
                         </div>
-                        <div className="font-display text-lg lws-gradient-text truncate">
-                            {config.name}
+                        <div className="font-display text-base text-rose-200 font-medium truncate">
+                            {config.name || "Sunset Love"}
                         </div>
                     </div>
 
                     {/* Mobile tabs */}
-                    <div className="md:hidden flex gap-1 border border-[color:var(--lws-border-strong)] rounded-full p-1">
+                    <div className="md:hidden flex gap-1 border border-white/10 rounded-full p-1 bg-black/20">
                         <button
                             type="button"
                             data-testid={EDITOR.tabsEdit}
                             onClick={() => setMobileMode("edit")}
-                            className={`text-xs px-3 py-1.5 rounded-full flex items-center gap-1 ${
+                            className={`text-xs px-3 py-1 rounded-full flex items-center gap-1 ${
                                 mobileMode === "edit"
-                                    ? "bg-[color:var(--lws-pink)] text-[#2a0714]"
-                                    : "text-[color:var(--lws-text-muted)]"
+                                    ? "bg-rose-500 text-white"
+                                    : "text-white/60"
                             }`}
                         >
                             <PenLine size={12} /> Edit
@@ -147,10 +155,10 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
                             type="button"
                             data-testid={EDITOR.tabsPreview}
                             onClick={() => setMobileMode("preview")}
-                            className={`text-xs px-3 py-1.5 rounded-full flex items-center gap-1 ${
+                            className={`text-xs px-3 py-1 rounded-full flex items-center gap-1 ${
                                 mobileMode === "preview"
-                                    ? "bg-[color:var(--lws-pink)] text-[#2a0714]"
-                                    : "text-[color:var(--lws-text-muted)]"
+                                    ? "bg-rose-500 text-white"
+                                    : "text-white/60"
                             }`}
                         >
                             <Eye size={12} /> Preview
@@ -161,7 +169,7 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
                         type="button"
                         onClick={() => setShowResetModal(true)}
                         data-testid={EDITOR.resetBtn}
-                        className="lws-btn-ghost text-xs"
+                        className="lws-btn-ghost text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5"
                     >
                         <RotateCcw size={14} />
                         <span className="hidden md:inline">Reset</span>
@@ -170,50 +178,57 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
                         type="button"
                         onClick={save}
                         data-testid={EDITOR.saveBtn}
-                        className="lws-btn-primary text-xs"
+                        className="lws-btn-primary text-xs flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-medium shadow-md transition"
                     >
                         <Save size={14} /> Save
                     </button>
                 </div>
                 {savedAt && (
-                    <div className="max-w-7xl mx-auto px-4 md:px-6 pb-2 text-[11px] text-[color:var(--lws-text-dim)]">
+                    <div className="max-w-[120rem] mx-auto px-4 md:px-6 pb-2 text-[11px] text-white/40">
                         Draft saved locally · {savedAt.toLocaleTimeString()}
                     </div>
                 )}
             </div>
 
-            <div className="max-w-[110rem] mx-auto grid md:grid-cols-[420px_1fr] lg:grid-cols-[460px_1fr]">
-                {/* Fields */}
+            {/* Main Split Grid Container */}
+            <div className="flex-1 grid md:grid-cols-[380px_1fr] lg:grid-cols-[420px_1fr] overflow-hidden">
+                {/* Left Side Form Fields */}
                 <aside
                     data-testid={EDITOR.fieldsPanel}
-                    className={`border-r border-[color:var(--lws-border)] p-4 md:p-6 space-y-6 max-h-[calc(100vh-140px)] overflow-y-auto ${
+                    className={`border-r border-[color:var(--lws-border)] bg-[#0d060b] p-4 md:p-6 space-y-6 overflow-y-auto h-[calc(100vh-65px)] ${
                         mobileMode === "edit" ? "block" : "hidden md:block"
                     }`}
                 >
-                    {(config.editableSchema || []).map((field) => (
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-rose-300/80 mb-4">
+                        Editable Content
+                    </h2>
+
+                    {schema.map((field) => (
                         <FieldRenderer
                             key={field.key}
                             field={field}
-                            value={content[field.key]}
+                            value={content[field.key] ?? field.defaultValue ?? ""}
                             onChange={(v) => updateField(field.key, v)}
                         />
                     ))}
-                    {(!config.editableSchema ||
-                        config.editableSchema.length === 0) && (
-                        <p className="text-sm text-[color:var(--lws-text-muted)]">
-                            This template has no editable fields.
+
+                    {schema.length === 0 && (
+                        <p className="text-sm text-white/40">
+                            This template has no editable fields configured.
                         </p>
                     )}
                 </aside>
 
-                {/* Preview */}
+                {/* Right Side Clean Live Preview */}
                 <section
                     data-testid={EDITOR.previewFrame}
-                    className={`min-h-[calc(100vh-140px)] max-h-[calc(100vh-140px)] overflow-y-auto ${
+                    className={`h-[calc(100vh-65px)] overflow-y-auto bg-black/40 relative ${
                         mobileMode === "preview" ? "block" : "hidden md:block"
                     }`}
                 >
-                    <TemplateRenderer templateSlug={slug} content={content} />
+                    <div className="w-full min-h-full">
+                        <TemplateRenderer templateSlug={slug} content={content} />
+                    </div>
                 </section>
             </div>
         </div>
