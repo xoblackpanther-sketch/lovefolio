@@ -3,6 +3,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackgroundMusic from "@/components/BackgroundMusic";
 import LandingPage from "@/pages/LandingPage";
 import MarketplacePage from "@/pages/MarketplacePage";
 import TemplateDetailsPage from "@/pages/TemplateDetailsPage";
@@ -33,6 +34,9 @@ function App() {
         <div className="App">
             <BrowserRouter>
                 <ScrollToTop />
+                {/* Global Sleek Ambient Music Player */}
+                <BackgroundMusic />
+
                 <Routes>
                     <Route
                         path="/"
