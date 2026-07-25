@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { EDITOR } from "@/constants/testIds";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Save, RotateCcw, Eye, PenLine } from "lucide-react";
+import { ArrowLeft, Save, RotateCcw, Eye, PenLine, AlertTriangle } from "lucide-react";
 import FieldRenderer from "@/editor/FieldRenderer";
 import TemplateRenderer from "@/components/TemplateRenderer";
 
@@ -33,6 +33,9 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
     const [mobileMode, setMobileMode] = useState("edit");
     const [savedAt, setSavedAt] = useState(null);
 
+    // State for Custom Reset Modal Popup
+    const [showResetModal, setShowResetModal] = useState(false);
+
     const updateField = useCallback((key, value) => {
         setContent((prev) => ({ ...prev, [key]: value }));
     }, []);
@@ -48,9 +51,8 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
         }
     }, [content, slug, siteId]);
 
-    const reset = () => {
-        if (!window.confirm("Reset all fields to the template's demo content?"))
-            return;
+    // Custom Reset Confirmation Handler
+    const handleConfirmReset = () => {
         setContent(structuredClone(config.demoData || {}));
         try {
             localStorage.removeItem(DRAFT_KEY(slug, siteId));
@@ -58,6 +60,7 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
             /* ignore */
         }
         setSavedAt(null);
+        setShowResetModal(false);
     };
 
     // Keyboard shortcut: ⌘/Ctrl + S
@@ -70,10 +73,43 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-    }, [save]); // Added 'save' dependency here
+    }, [save]);
 
     return (
-        <div data-testid={EDITOR.root} className="min-h-[calc(100vh-72px)]">
+        <div data-testid={EDITOR.root} className="min-h-[calc(100vh-72px)] relative">
+            {/* Custom Modern Reset Confirmation Modal */}
+            {showResetModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-neutral-900 border border-neutral-800 text-white rounded-2xl p-6 max-w-sm w-full shadow-2xl relative space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-full bg-rose-500/10 text-rose-400">
+                                <AlertTriangle size={20} />
+                            </div>
+                            <h3 className="font-serif text-lg font-semibold text-amber-100">Reset All Fields?</h3>
+                        </div>
+                        <p className="text-sm text-neutral-400 leading-relaxed">
+                            Are you sure you want to reset all fields to the default demo content? Any unsaved edits will be lost.
+                        </p>
+                        <div className="flex items-center justify-end gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowResetModal(false)}
+                                className="px-4 py-2 text-xs font-medium rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmReset}
+                                className="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition-all"
+                            >
+                                Yes, Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Toolbar */}
             <div className="border-b border-[color:var(--lws-border)] bg-[color:var(--lws-bg-2)] sticky top-[72px] z-30">
                 <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3">
@@ -123,7 +159,7 @@ export default function TemplateEditor({ templateEntry, siteId = "demo" }) {
 
                     <button
                         type="button"
-                        onClick={reset}
+                        onClick={() => setShowResetModal(true)}
                         data-testid={EDITOR.resetBtn}
                         className="lws-btn-ghost text-xs"
                     >
