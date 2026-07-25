@@ -7,9 +7,8 @@
 import AuroraSampleTemplate from "@/templates/aurora-sample/AuroraSampleTemplate";
 import auroraSampleConfig from "@/templates/aurora-sample/template.config";
 
-// Sunset Love Template & Config Import
+// Sunset Love Template Import (No missing template.config import!)
 import SunsetLoveTemplate from "../templates/sunset-love/SunsetLoveTemplate";
-import sunsetLoveConfig from "../templates/sunset-love/template.config";
 
 export const templateRegistry = {
   [auroraSampleConfig.slug]: {
@@ -17,11 +16,11 @@ export const templateRegistry = {
     config: auroraSampleConfig,
   },
 
-  // 2. Sunset Love Entry with Config Fallback
+  // Sunset Love Entry
   "sunset-love": {
     component: SunsetLoveTemplate,
     comingSoon: false,
-    config: sunsetLoveConfig || {
+    config: {
       id: "sunset-love",
       slug: "sunset-love",
       name: "Sunset Love",
@@ -39,7 +38,6 @@ export const templateRegistry = {
         "Romantic music player",
         "Love notes",
       ],
-      // Fallback schema agar config import na mile
       editableSchema: [
         { key: "heroBadge", label: "Badge Text", type: "text", defaultValue: "SUNSET LOVE COLLECTION" },
         { key: "heroTitle", label: "Main Title", type: "text", defaultValue: "Our Love Story Under the Sunset" },
