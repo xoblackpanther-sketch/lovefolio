@@ -1,28 +1,35 @@
 import React, { useState, useRef } from "react";
 import { Volume2, VolumeX, Heart, Sparkles } from "lucide-react";
 
-export default function SunsetLoveTemplate({ data = {} }) {
-  // Helper to fallback safely if field is empty string or undefined
-  const getVal = (key, fallback) => (data && data[key] ? data[key] : fallback);
+export default function SunsetLoveTemplate(props) {
+  // Support any shape of content passed from editor
+  const data = props.data || props.content || props || {};
 
-  // Background Music & Header
+  const getVal = (key, fallback) => {
+    if (data && data[key] !== undefined && data[key] !== null && data[key] !== "") {
+      return data[key];
+    }
+    return fallback;
+  };
+
+  // Header & Music
   const musicUrl = getVal("bgMusicUrl", "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3");
   const badge = getVal("heroBadge", "✨ SUNSET LOVE COLLECTION");
   const title = getVal("heroTitle", "Our Love Story Under the Golden Sunset");
   const names = getVal("coupleNames", "Alex & Sam");
   const quote = getVal("quote", "“In every universe, in every lifetime, I would still find you and choose you.”");
 
-  // Polaroid Memory Card 1
+  // Polaroid 1
   const card1Img = getVal("card1Image", "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80");
   const card1Title = getVal("card1Title", "Our First Sunset Walk 🌅");
   const card1Caption = getVal("card1Caption", "Golden hour, soft breeze, and endless conversations.");
 
-  // Polaroid Memory Card 2
+  // Polaroid 2
   const card2Img = getVal("card2Image", "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80");
   const card2Title = getVal("card2Title", "Caramel Latte & Smiles ☕");
   const card2Caption = getVal("card2Caption", "That cute little coffee place on a rainy afternoon.");
 
-  // Polaroid Memory Card 3
+  // Polaroid 3
   const card3Img = getVal("card3Image", "https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?auto=format&fit=crop&w=1200&q=80");
   const card3Title = getVal("card3Title", "Under the Starry Night ✨");
   const card3Caption = getVal("card3Caption", "Promises made when the world went quiet.");
@@ -36,7 +43,6 @@ export default function SunsetLoveTemplate({ data = {} }) {
   const note2 = getVal("loveNote2", "My favorite place in the world is right beside you. 💖");
   const note3 = getVal("loveNote3", "Forever is just the beginning of our story. ✨");
 
-  // Audio Control State
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
@@ -53,10 +59,9 @@ export default function SunsetLoveTemplate({ data = {} }) {
 
   return (
     <div className="min-h-screen bg-[#0d070b] text-[#fbf3f5] font-sans selection:bg-rose-500/30 relative overflow-x-hidden pb-20">
-      {/* Background Audio Player */}
       <audio ref={audioRef} src={musicUrl} loop prefetch="auto" />
 
-      {/* Floating Music Control Badge */}
+      {/* Floating Music Control */}
       <button
         onClick={toggleMusic}
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-black/70 border border-rose-400/30 backdrop-blur-md shadow-2xl text-xs font-medium text-rose-200 hover:bg-rose-950/40 transition cursor-pointer group"
@@ -68,13 +73,13 @@ export default function SunsetLoveTemplate({ data = {} }) {
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-400"></span>
         </span>
         {isPlaying ? <Volume2 size={15} className="text-rose-300" /> : <VolumeX size={15} className="text-white/50" />}
-        <span>{isPlaying ? "Playing Romantic Sunset Track" : "Play Music 🎵"}</span>
+        <span>{isPlaying ? "Playing Sunset Audio" : "Play Music 🎵"}</span>
       </button>
 
-      {/* Warm Ambient Glow Effects */}
+      {/* Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-amber-500/15 via-rose-500/10 to-transparent blur-[120px] pointer-events-none" />
 
-      {/* HERO SECTION */}
+      {/* Hero Section */}
       <section className="relative pt-20 pb-16 px-6 text-center max-w-4xl mx-auto space-y-6">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-400/20 text-rose-300 text-xs tracking-widest font-medium uppercase shadow-inner">
           <Sparkles size={13} className="text-amber-300" />
@@ -94,7 +99,7 @@ export default function SunsetLoveTemplate({ data = {} }) {
         </p>
       </section>
 
-      {/* LUXURY POLAROID GALLERY */}
+      {/* Polaroid Gallery */}
       <section className="max-w-6xl mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <h2 className="text-xs uppercase tracking-[0.3em] font-bold text-rose-300/70 mb-1">
@@ -104,46 +109,34 @@ export default function SunsetLoveTemplate({ data = {} }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
-          {/* Polaroid Card 1 */}
+          {/* Card 1 */}
           <div className="group bg-[#fdfbf7] p-4 pb-6 rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:rotate-1">
             <div className="relative overflow-hidden rounded-xl aspect-[4/5] bg-stone-200">
-              <img
-                src={card1Img}
-                alt={card1Title}
-                className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-              />
+              <img src={card1Img} alt={card1Title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
             </div>
-            <div className="mt-4 text-center text-stone-900 block">
+            <div className="mt-4 text-center px-1">
               <h3 className="font-serif font-bold text-lg text-amber-950 block">{card1Title}</h3>
               <p className="text-xs text-stone-700 mt-1 font-serif italic block">{card1Caption}</p>
             </div>
           </div>
 
-          {/* Polaroid Card 2 */}
+          {/* Card 2 */}
           <div className="group bg-[#fdfbf7] p-4 pb-6 rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:-rotate-1 md:translate-y-4">
             <div className="relative overflow-hidden rounded-xl aspect-[4/5] bg-stone-200">
-              <img
-                src={card2Img}
-                alt={card2Title}
-                className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-              />
+              <img src={card2Img} alt={card2Title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
             </div>
-            <div className="mt-4 text-center text-stone-900 block">
+            <div className="mt-4 text-center px-1">
               <h3 className="font-serif font-bold text-lg text-amber-950 block">{card2Title}</h3>
               <p className="text-xs text-stone-700 mt-1 font-serif italic block">{card2Caption}</p>
             </div>
           </div>
 
-          {/* Polaroid Card 3 */}
+          {/* Card 3 */}
           <div className="group bg-[#fdfbf7] p-4 pb-6 rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:rotate-1">
             <div className="relative overflow-hidden rounded-xl aspect-[4/5] bg-stone-200">
-              <img
-                src={card3Img}
-                alt={card3Title}
-                className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-              />
+              <img src={card3Img} alt={card3Title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
             </div>
-            <div className="mt-4 text-center text-stone-900 block">
+            <div className="mt-4 text-center px-1">
               <h3 className="font-serif font-bold text-lg text-amber-950 block">{card3Title}</h3>
               <p className="text-xs text-stone-700 mt-1 font-serif italic block">{card3Caption}</p>
             </div>
@@ -151,7 +144,7 @@ export default function SunsetLoveTemplate({ data = {} }) {
         </div>
       </section>
 
-      {/* LUXURY HANDWRITTEN LOVE LETTER */}
+      {/* Love Letter */}
       <section className="max-w-3xl mx-auto px-6 py-12">
         <div className="relative bg-gradient-to-b from-[#1a0d16] to-[#12080f] border border-rose-500/20 rounded-3xl p-8 md:p-12 shadow-2xl space-y-6">
           <div className="absolute -top-5 left-1/2 -translate-x-1/2 p-3 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 shadow-xl">
@@ -168,7 +161,7 @@ export default function SunsetLoveTemplate({ data = {} }) {
         </div>
       </section>
 
-      {/* LITTLE LOVE NOTES SECTION */}
+      {/* Love Notes */}
       <section className="max-w-2xl mx-auto px-6 py-8 space-y-4 text-center">
         <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-amber-200/60 mb-6">
           Little Reminders
