@@ -1,123 +1,168 @@
-import React, { useState } from "react";
-import { Heart, Music, Image as ImageIcon, MessageCircle, Sparkles, Volume2, VolumeX } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Volume2, VolumeX, Heart, Sparkles } from "lucide-react";
 
-export default function SunsetLoveTemplate({ data }) {
+export default function SunsetLoveTemplate({ data = {} }) {
+  const musicUrl = data.bgMusicUrl || "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3";
+  const badge = data.heroBadge || "✨ SUNSET LOVE COLLECTION";
+  const title = data.heroTitle || "Our Love Story Under the Golden Sunset";
+  const names = data.coupleNames || "Alex & Sam";
+  const quote = data.quote || "“In every universe, in every lifetime, I would still find you and choose you.”";
+
+  const card1Img = data.card1Image || "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80";
+  const card1Title = data.card1Title || "Our First Sunset Walk 🌅";
+  const card1Caption = data.card1Caption || "Golden hour, soft breeze, and endless conversations.";
+
+  const card2Img = data.card2Image || "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80";
+  const card2Title = data.card2Title || "Caramel Latte & Smiles ☕";
+  const card2Caption = data.card2Caption || "That cute little coffee place on a rainy afternoon.";
+
+  const card3Img = data.card3Image || "https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?auto=format&fit=crop&w=1200&q=80";
+  const card3Title = data.card3Title || "Under the Starry Night ✨";
+  const card3Caption = data.card3Caption || "Promises made when the world went quiet.";
+
+  const letterTitle = data.letterTitle || "A Letter From My Heart 💌";
+  const letterMsg = data.letterMessage || "My Dearest,\n\nFrom the moment you stepped into my life, everything felt brighter—like warm golden sunlight after a long winter. Thank you for the laughs, the quiet comforting silences, and for loving me so effortlessly.\n\nYours Always.";
+
+  const note1 = data.loveNote1 || "You make every single day feel like golden hour. 🌄";
+  const note2 = data.loveNote2 || "My favorite place in the world is right beside you. 💖";
+  const note3 = data.loveNote3 || "Forever is just the beginning of our story. ✨";
+
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
 
-  // Sample data fallback if props are empty
-  const defaultData = {
-    title: "Our Love Story Under the Sunset",
-    partnerName: "Alex & Sam",
-    subtitle: "Every sunset brings us closer together...",
-    musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    loveMessage:
-      "From the moment we met, every sunset has felt a little warmer. Here's to all our polaroid memories, late-night conversations, and the endless adventures waiting for us.",
-    memories: [
-      { id: 1, title: "Our First Sunset Walk", caption: "Golden hour and endless conversations.", url: "https://images.unsplash.com/photo-1518173946687-a4c8a383392e?q=80&w=600" },
-      { id: 2, title: "Coffee Date Memories", caption: "Laughing over extra caramel lattes.", url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600" },
-      { id: 3, title: "Starry Night Together", caption: "Watching stars when the sun goes down.", url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=600" }
-    ],
-    notes: [
-      "You make every single day feel like golden hour. 🌄",
-      "Thank you for being my favourite person to watch the sunset with. ❤️",
-      "Forever is just the beginning of us. ✨"
-    ]
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
+    }
   };
 
-  const content = { ...defaultData, ...data };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-950 via-rose-950 to-neutral-950 text-amber-50 selection:bg-rose-500 selection:text-white font-sans relative overflow-hidden pb-16">
-      
-      {/* Background Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-amber-500/20 via-rose-500/10 to-transparent blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#0d070b] text-[#fbf3f5] font-sans selection:bg-rose-500/30 relative overflow-x-hidden pb-20">
+      {/* Audio Player */}
+      <audio ref={audioRef} src={musicUrl} loop prefetch="auto" />
 
-      {/* Music Player Button */}
-      <div className="fixed top-5 right-5 z-50">
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-900/40 backdrop-blur-md border border-amber-500/30 shadow-lg hover:bg-amber-900/60 transition-all text-amber-200 text-sm"
-        >
-          <Music className="w-4 h-4 text-rose-400 animate-pulse" />
-          <span>{isPlaying ? "Pause Music" : "Play Sunset Music"}</span>
-          {isPlaying ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-amber-400/60" />}
-        </button>
-      </div>
+      {/* Floating Music Control */}
+      <button
+        onClick={toggleMusic}
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-black/60 border border-rose-400/30 backdrop-blur-md shadow-2xl text-xs font-medium text-rose-200 hover:bg-rose-950/40 transition cursor-pointer"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          {isPlaying && (
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+          )}
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-400"></span>
+        </span>
+        {isPlaying ? <Volume2 size={15} className="text-rose-300" /> : <VolumeX size={15} className="text-white/50" />}
+        <span>{isPlaying ? "Playing Sunset Audio" : "Play Music 🎵"}</span>
+      </button>
+
+      {/* Ambient Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-amber-500/15 via-rose-500/10 to-transparent blur-[120px] pointer-events-none" />
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-12 px-6 text-center max-w-3xl mx-auto flex flex-col items-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs tracking-wider uppercase mb-6">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Sunset Love Collection
+      <section className="relative pt-20 pb-16 px-6 text-center max-w-4xl mx-auto space-y-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-400/20 text-rose-300 text-xs tracking-widest font-medium uppercase shadow-inner">
+          <Sparkles size={13} className="text-amber-300" />
+          <span>{badge}</span>
         </div>
-        <h1 className="text-4xl md:text-6xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-rose-200 to-amber-400 mb-4 tracking-tight leading-tight">
-          {content.title}
+
+        <h1 className="text-4xl md:text-6xl font-serif font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-rose-200 to-amber-200 tracking-tight leading-tight">
+          {title}
         </h1>
-        <p className="text-rose-200/80 text-lg md:text-xl font-light max-w-xl">
-          {content.partnerName}
+
+        <p className="text-xl md:text-2xl font-serif italic text-rose-200/90 font-medium">
+          {names}
         </p>
-        <p className="text-amber-200/60 text-sm mt-2 italic">
-          "{content.subtitle}"
+
+        <p className="text-sm md:text-base text-stone-300/80 max-w-2xl mx-auto leading-relaxed font-light italic bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+          {quote}
         </p>
       </section>
 
-      {/* Polaroid Gallery Section */}
-      <section className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex items-center gap-2 mb-8 justify-center text-amber-300">
-          <ImageIcon className="w-5 h-5 text-rose-400" />
-          <h2 className="text-2xl font-serif font-semibold">Polaroid Memories</h2>
+      {/* Polaroid Gallery */}
+      <section className="max-w-6xl mx-auto px-6 py-12">
+        <div className="text-center mb-10">
+          <h2 className="text-xs uppercase tracking-[0.3em] font-bold text-rose-300/70 mb-1">
+            Polaroid Memories
+          </h2>
+          <p className="font-serif text-2xl text-amber-100">Frozen Moments in Time</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {content.memories.map((item, idx) => (
-            <div
-              key={item.id || idx}
-              className="bg-neutral-100 text-neutral-900 p-4 pb-6 rounded-sm shadow-2xl transform hover:-translate-y-2 hover:rotate-1 transition-all duration-300 relative group"
-              style={{ rotate: `${(idx % 2 === 0 ? 1 : -1) * (idx + 1.5)}deg` }}
-            >
-              <div className="aspect-[4/3] overflow-hidden bg-neutral-200 mb-4 rounded-xs">
-                <img
-                  src={item.url}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <h3 className="font-serif font-bold text-lg text-neutral-800">{item.title}</h3>
-              <p className="text-xs text-neutral-600 mt-1 italic">{item.caption}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+          {/* Card 1 */}
+          <div className="group bg-[#fdfbf7] p-4 pb-6 rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:rotate-1">
+            <div className="relative overflow-hidden rounded-xl aspect-[4/5] bg-stone-200">
+              <img src={card1Img} alt={card1Title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
             </div>
-          ))}
+            <div className="mt-4 text-center text-stone-800">
+              <h3 className="font-serif font-bold text-lg text-amber-950">{card1Title}</h3>
+              <p className="text-xs text-stone-600 mt-1 font-serif italic">{card1Caption}</p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="group bg-[#fdfbf7] p-4 pb-6 rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:-rotate-1 md:translate-y-4">
+            <div className="relative overflow-hidden rounded-xl aspect-[4/5] bg-stone-200">
+              <img src={card2Img} alt={card2Title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+            </div>
+            <div className="mt-4 text-center text-stone-800">
+              <h3 className="font-serif font-bold text-lg text-amber-950">{card2Title}</h3>
+              <p className="text-xs text-stone-600 mt-1 font-serif italic">{card2Caption}</p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="group bg-[#fdfbf7] p-4 pb-6 rounded-2xl shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:rotate-1">
+            <div className="relative overflow-hidden rounded-xl aspect-[4/5] bg-stone-200">
+              <img src={card3Img} alt={card3Title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+            </div>
+            <div className="mt-4 text-center text-stone-800">
+              <h3 className="font-serif font-bold text-lg text-amber-950">{card3Title}</h3>
+              <p className="text-xs text-stone-600 mt-1 font-serif italic">{card3Caption}</p>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Love Message Section */}
-      <section className="max-w-2xl mx-auto px-6 py-10 text-center">
-        <div className="bg-gradient-to-b from-amber-900/30 to-rose-950/40 border border-amber-500/20 rounded-2xl p-8 backdrop-blur-md shadow-xl relative">
-          <Heart className="w-8 h-8 text-rose-500 mx-auto mb-4 animate-bounce" />
-          <h3 className="text-xl font-serif text-amber-200 mb-3">A Note From My Heart</h3>
-          <p className="text-amber-100/90 leading-relaxed text-sm md:text-base italic">
-            "{content.loveMessage}"
-          </p>
+      {/* Love Letter */}
+      <section className="max-w-3xl mx-auto px-6 py-12">
+        <div className="relative bg-gradient-to-b from-[#1a0d16] to-[#12080f] border border-rose-500/20 rounded-3xl p-8 md:p-12 shadow-2xl space-y-6">
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 p-3 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 shadow-xl">
+            <Heart size={22} className="fill-rose-400 text-rose-400 animate-pulse" />
+          </div>
+
+          <h2 className="text-center font-serif text-2xl md:text-3xl text-amber-100 font-semibold pt-2">
+            {letterTitle}
+          </h2>
+
+          <div className="whitespace-pre-line font-serif italic text-stone-200/90 text-base md:text-lg leading-relaxed text-center px-2 md:px-6">
+            {letterMsg}
+          </div>
         </div>
       </section>
 
-      {/* Sunset Love Notes List */}
-      <section className="max-w-xl mx-auto px-6 py-6">
-        <div className="flex items-center gap-2 mb-6 justify-center text-amber-300">
-          <MessageCircle className="w-5 h-5 text-amber-400" />
-          <h2 className="text-xl font-serif">Little Love Notes</h2>
-        </div>
+      {/* Love Notes */}
+      <section className="max-w-2xl mx-auto px-6 py-8 space-y-4 text-center">
+        <h3 className="text-xs uppercase tracking-[0.25em] font-bold text-amber-200/60 mb-6">
+          Little Reminders
+        </h3>
+
         <div className="space-y-3">
-          {content.notes.map((note, index) => (
+          {[note1, note2, note3].map((note, idx) => (
             <div
-              key={index}
-              className="p-4 rounded-xl bg-amber-950/40 border border-amber-500/15 text-amber-200/90 text-sm flex items-center gap-3 backdrop-blur-xs"
+              key={idx}
+              className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-stone-200 text-sm md:text-base font-serif italic shadow-md hover:border-rose-400/30 transition-all"
             >
-              <span className="w-2 h-2 rounded-full bg-rose-400 shrink-0" />
-              <p>{note}</p>
+              {note}
             </div>
           ))}
         </div>
       </section>
-
     </div>
   );
 }
